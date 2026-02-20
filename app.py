@@ -77,10 +77,11 @@ st.subheader("Add Extra Amortizations")
 # Create an editable dataframe for user input
 input_df = pd.DataFrame({"Month": range(1, int(installments) + 1), "Extra Amortization": 0.0})
 
+# Updated parameter here:
 edited_df = st.data_editor(
     input_df, 
     hide_index=True, 
-    use_container_width=True,
+    width='stretch',
     column_config={
         "Month": st.column_config.NumberColumn(disabled=True),
         "Extra Amortization": st.column_config.NumberColumn(format="$%.2f", min_value=0.0)
@@ -125,7 +126,7 @@ compare_df = pd.merge(
     on="Month",
     how="left",
     suffixes=('_Base', '_Amortized')
-).fillna(0) # Fill NaNs with 0 for months after the loan is paid off early
+).fillna(0)
 
 col_chart1, col_chart2 = st.columns(2)
 
@@ -137,7 +138,7 @@ with col_chart1:
     fig_interest.add_trace(go.Scatter(x=compare_df["Month"], y=compare_df["Cumulative Interest_Amortized"], 
                                       mode='lines', name='Actual Interest', line=dict(color='green', width=3)))
     fig_interest.update_layout(title="Cumulative Interest Paid (Fees)", xaxis_title="Month", yaxis_title="Amount ($)")
-    st.plotly_chart(fig_interest, use_container_width=True)
+    st.plotly_chart(fig_interest, width='stretch') # Updated parameter
 
 with col_chart2:
     # 2. Remaining Balance Comparison
@@ -147,28 +148,27 @@ with col_chart2:
     fig_balance.add_trace(go.Scatter(x=compare_df["Month"], y=compare_df["Remaining Balance_Amortized"], 
                                      mode='lines', name='Actual Balance', line=dict(color='blue', width=3), fill='tozeroy'))
     fig_balance.update_layout(title="Remaining Principal Balance", xaxis_title="Month", yaxis_title="Balance ($)")
-    st.plotly_chart(fig_balance, use_container_width=True)
+    st.plotly_chart(fig_balance, width='stretch') # Updated parameter
 
-# 3. Monthly Payments Breakdown (Stacked Bar + Line)
+# 3. Monthly Payments Breakdown
 st.markdown("#### Monthly Cash Flow Breakdown")
 fig_payments = go.Figure()
 
-# Stacked bars for Actual Payments
 fig_payments.add_trace(go.Bar(x=final_schedule["Month"], y=final_schedule["Installment"], 
                               name='Standard Installment', marker_color='lightblue'))
 fig_payments.add_trace(go.Bar(x=final_schedule["Month"], y=final_schedule["Extra Amortization"], 
                               name='Extra Amortization', marker_color='orange'))
 
-# Line for Baseline Total Payment (to see what it would have been)
 fig_payments.add_trace(go.Scatter(x=compare_df["Month"], y=compare_df["Total Paid This Month_Base"], 
                                   mode='lines', name='Baseline Monthly Total', line=dict(color='red', dash='dot')))
 
 fig_payments.update_layout(barmode='stack', title="Actual Payments vs. Baseline Payments", 
                            xaxis_title="Month", yaxis_title="Payment Amount ($)")
-st.plotly_chart(fig_payments, use_container_width=True)
+st.plotly_chart(fig_payments, width='stretch') # Updated parameter
 
 # --- FINAL TABLE VIEW ---
 with st.expander("View Full Amortization Table"):
+    # Updated parameter here:
     st.dataframe(
         final_schedule.style.format({
             "Installment": "${:,.2f}",
@@ -179,6 +179,6 @@ with st.expander("View Full Amortization Table"):
             "Remaining Balance": "${:,.2f}",
             "Cumulative Interest": "${:,.2f}"
         }),
-        use_container_width=True,
+        width='stretch',
         hide_index=True
     )
